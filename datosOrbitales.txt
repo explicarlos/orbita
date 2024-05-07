@@ -1,0 +1,12 @@
+datos órbita lunar
+---------------------------------
+masa tierra: 5,9736 × 1024 kg
+radio tierra: 6371 km
+---------------------------------
+masa luna: 7,349 × 1022 kg
+radio luna: 1737 km
+radio orbital luna: 384403 km
+---------------------------------
+relación radio tierra/radio luna: 3.7
+relación radio tierra/radio órbita: 0.0166
+
