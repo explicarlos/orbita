@@ -1,2 +1,2 @@
 # orbita
-Simulador de órbitas
+Simulador de órbitas.
