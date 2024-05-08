@@ -238,9 +238,9 @@ public class VistaOrbita extends JFrame {
     int margenCabecera=38; // px
     double xTierra; // px
     double yTierra; // px
-    double radioTierra=150.0; // px
-    double gravitacionTierra=70000.0; // px/seg²
-    double radioLuna=15.0; // px
+    double radioTierra=30.0; // px
+    double gravitacionTierra=100000.0; // px/seg²
+    double radioLuna=10.0; // px
     double radioOrbitaLuna; // px
     double periodoLuna=60.0; // seg
     double anguloLuna=0.0; // rad
@@ -253,7 +253,7 @@ public class VistaOrbita extends JFrame {
     double xNave; // px
     double yNave; // px
     double radioMeteorito; // px
-    int lapso=33; // intervalo programado de actualización de estado en ms
+    int lapso=35; // intervalo programado de actualización de estado en ms
     long instanteRegistrado; // tiempo anterior registrado para cálculos de movimiento
     double tiempoTranscurrido; // intervalo real de tiempo transcurrido
     Timer timer;
@@ -263,13 +263,20 @@ public class VistaOrbita extends JFrame {
     int xMax; // máximo x para visibilidad en espacio
     int yMin; // mínimo y para visibilidad en espacio
     int yMax; // máximo y para visibilidad en espacio
+    double factorAcelerante=1.05; // factor de aceleración y frenado manual de la nave
 
     // métodos --------------------------------------------------------------------------------------
     private void botonAActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        vxNave*=factorAcelerante;
+        vyNave*=factorAcelerante;
+        // campoEstado.setText("  "+"Nave acelerada.");
+        return;
     }
     private void botonBActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
+        vxNave/=factorAcelerante;
+        vyNave/=factorAcelerante;
+        // campoEstado.setText("  "+"Nave frenada.");
+        return;
     }
     private void botonCActionPerformed(java.awt.event.ActionEvent evt) {
         lanzarNave();
@@ -279,9 +286,11 @@ public class VistaOrbita extends JFrame {
         if (esActivo) {
             botonD.setText("continuar");
             esActivo=false;
+            campoEstado.setText("  "+"Tiempo detenido.");
         } else {
             botonD.setText("pausar");
             esActivo=true;
+            campoEstado.setText("  "+"Tiempo trancurriendo.");
         }
         return;
     }
@@ -318,7 +327,9 @@ public class VistaOrbita extends JFrame {
         if (anguloLuna<0)
             anguloLuna+=360;
         double rads=Math.toRadians(anguloLuna);
-        luna.setLocation((int) (xTierra+radioOrbitaLuna*Math.cos(rads)), (int) (yTierra+radioOrbitaLuna*Math.sin(rads)));
+        xLuna=xTierra+radioOrbitaLuna*Math.cos(rads);
+        yLuna=yTierra+radioOrbitaLuna*Math.sin(rads);
+        luna.setLocation((int) (xLuna-radioLuna), (int) (yLuna-radioLuna));
         return;
     }
     public void actualizarNave() {
@@ -327,7 +338,7 @@ public class VistaOrbita extends JFrame {
         double xDeltaT=xTierra-xNave;
         double yDeltaT=yTierra-yNave;
         double distanciaTierra=Math.sqrt(xDeltaT*xDeltaT+yDeltaT*yDeltaT);
-        // campoEstado.setText("dT: "+distanciaTierra);
+        campoEstado.setText("  "+"Distancia: "+((int) distanciaTierra));
         if (distanciaTierra<radioTierra+radioNave) {
             aparcarNave();
             return;
@@ -341,17 +352,16 @@ public class VistaOrbita extends JFrame {
         }
         nave.setVisible(xNave>xMin && xNave<xMax && yNave>yMin && yNave<yMax);
         double aceleracionTierra=gravitacionTierra/(distanciaTierra*distanciaTierra);
-        campoEstado.setText("aT: "+aceleracionTierra);
         double xAceleracionT=aceleracionTierra*xDeltaT/distanciaTierra;
         double yAceleracionT=aceleracionTierra*yDeltaT/distanciaTierra;
         double aceleracionLuna=gravitacionLuna/(distanciaLuna*distanciaLuna);
-        double xAceleracionL=aceleracionLuna*xDeltaT/distanciaLuna;
-        double yAceleracionL=aceleracionLuna*yDeltaT/distanciaLuna;
+        double xAceleracionL=aceleracionLuna*xDeltaL/distanciaLuna;
+        double yAceleracionL=aceleracionLuna*yDeltaL/distanciaLuna;
         xNave+=vxNave*tiempoTranscurrido;
         yNave+=vyNave*tiempoTranscurrido;
         vxNave+=(xAceleracionT+xAceleracionL)*tiempoTranscurrido;
         vyNave+=(yAceleracionT+yAceleracionL)*tiempoTranscurrido;
-        nave.setLocation((int) xNave, (int) yNave);
+        nave.setLocation((int) (xNave-radioNave), (int) (yNave-radioNave));
         return;
     }
 
@@ -368,7 +378,7 @@ public class VistaOrbita extends JFrame {
         vyNave=0.0;
         nave.setLocation((int) xNave, (int) yNave);
         nave.setVisible(true);
-        campoEstado.setText("  "+"Nave lanzada.");
+        // campoEstado.setText("  "+"Nave lanzada.");
         return;
     }
     public void aparcarNave() {
@@ -378,7 +388,7 @@ public class VistaOrbita extends JFrame {
         vxNave=0.0;
         vyNave=0.0;
         nave.setLocation((int) xNave, (int) yNave);
-        campoEstado.setText("  "+"Nave destruida.");
+        // campoEstado.setText("  "+"Nave destruida.");
         return;
     }
 }
