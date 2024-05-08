@@ -165,6 +165,7 @@ public class VistaOrbita extends JFrame {
         campoEstado.setRequestFocusEnabled(false);
         campoEstado.setVerifyInputWhenFocusTarget(false);
         campoEstado.setVerticalTextPosition(SwingConstants.TOP);
+        campoEstado.setForeground(Color.BLUE);
         setResizable(false);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -238,7 +239,7 @@ public class VistaOrbita extends JFrame {
     double xTierra; // px
     double yTierra; // px
     double radioTierra=150.0; // px
-    double gravitacionTierra=4.0; // px/seg²
+    double gravitacionTierra=10.0; // px/seg²
     double radioLuna=15.0; // px
     double radioOrbitaLuna; // px
     double periodoLuna=60.0; // seg
@@ -298,6 +299,7 @@ public class VistaOrbita extends JFrame {
         xLuna=xTierra+radioOrbitaLuna;
         yLuna=yTierra;
         gravitacionLuna=gravitacionTierra/50.0;
+        aparcarNave();
         timer = new Timer(lapso, new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 registrarInstante();
@@ -316,16 +318,39 @@ public class VistaOrbita extends JFrame {
         anguloLuna-=360.0/periodoLuna*tiempoTranscurrido;
         if (anguloLuna<0)
             anguloLuna+=360;
-        double rads=anguloLuna*Math.PI/180.0;
+        double rads=Math.toRadians(anguloLuna);
         luna.setLocation((int) (xTierra+radioOrbitaLuna*Math.cos(rads)), (int) (yTierra+radioOrbitaLuna*Math.sin(rads)));
         return;
     }
     public void actualizarNave() {
         if (!esActivo)
             return;
-        double distanciaCuadradoTierra=(xTierra-xNave)*(xTierra-xNave)+(yTierra-yNave)*(yTierra-yNave);
-        double aceleracionTierra=gravitacionTierra/((xTierra-xNave)*(xTierra-xNave)+(yTierra-yNave)*(yTierra-yNave));
-
+        double xDeltaT=xTierra-xNave;
+        double yDeltaT=yTierra-yNave;
+        double distanciaTierra=Math.sqrt(xDeltaT*xDeltaT+yDeltaT*yDeltaT);
+        if (distanciaTierra<radioTierra+radioNave) {
+            aparcarNave();
+            return;
+        }
+        double xDeltaL=xLuna-xNave;
+        double yDeltaL=yLuna-yNave;
+        double distanciaLuna=Math.sqrt(xDeltaL*xDeltaL+yDeltaL*yDeltaL);
+        if (distanciaLuna<radioLuna+radioNave) {
+            aparcarNave();
+            return;
+        }
+        nave.setVisible(xNave>xMin && xNave<xMax && yNave>yMin && yNave<yMax);
+        double aceleracionTierra=gravitacionTierra/(distanciaTierra*distanciaTierra);
+        double xAceleracionT=aceleracionTierra*xDeltaT/distanciaTierra;
+        double yAceleracionT=aceleracionTierra*yDeltaT/distanciaTierra;
+        double aceleracionLuna=gravitacionLuna/(distanciaLuna*distanciaLuna);
+        double xAceleracionL=aceleracionLuna*xDeltaT/distanciaLuna;
+        double yAceleracionL=aceleracionLuna*yDeltaT/distanciaLuna;
+        xNave+=vxNave*tiempoTranscurrido;
+        yNave+=vyNave*tiempoTranscurrido;
+        vxNave+=(xAceleracionT+xAceleracionL)*tiempoTranscurrido;
+        vyNave+=(yAceleracionT+yAceleracionL)*tiempoTranscurrido;
+        nave.setLocation((int) xNave, (int) yNave);
         return;
     }
 
@@ -338,10 +363,21 @@ public class VistaOrbita extends JFrame {
     public void lanzarNave() {
         xNave=xTierra;
         yNave=yTierra/2.0;
-        vxNave=0;
-        vyNave=-20.0;
+        vxNave=-20.0;
+        vyNave=0.0;
         nave.setLocation((int) xNave, (int) yNave);
         nave.setVisible(true);
+        campoEstado.setText("  "+"Nave lanzada.");
+        return;
+    }
+    public void aparcarNave() {
+        nave.setVisible(false);
+        xNave=1e7;
+        yNave=0.0;
+        vxNave=0.0;
+        vyNave=0.0;
+        nave.setLocation((int) xNave, (int) yNave);
+        campoEstado.setText("  "+"Nave destruida.");
         return;
     }
 }
