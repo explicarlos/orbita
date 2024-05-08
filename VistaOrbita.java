@@ -239,7 +239,7 @@ public class VistaOrbita extends JFrame {
     double xTierra; // px
     double yTierra; // px
     double radioTierra=150.0; // px
-    double gravitacionTierra=10.0; // px/seg²
+    double gravitacionTierra=70000.0; // px/seg²
     double radioLuna=15.0; // px
     double radioOrbitaLuna; // px
     double periodoLuna=60.0; // seg
@@ -293,12 +293,12 @@ public class VistaOrbita extends JFrame {
         xMax=espacio.getX()+espacio.getWidth()-margenVisibilidad;
         yMin=espacio.getY()+margenVisibilidad;
         yMax=espacio.getY()+espacio.getHeight()-margenVisibilidad;
-        xTierra= espacio.getX()+espacio.getWidth()/2.0;
-        yTierra= espacio.getY()+espacio.getHeight()/2.0;
+        xTierra=(espacio.getX()+espacio.getWidth())/2.0;
+        yTierra=(espacio.getY()+espacio.getHeight())/2.0;
         radioOrbitaLuna=espacio.getHeight()*2.0/5.0;
         xLuna=xTierra+radioOrbitaLuna;
         yLuna=yTierra;
-        gravitacionLuna=gravitacionTierra/50.0;
+        gravitacionLuna=gravitacionTierra/5.0;
         aparcarNave();
         timer = new Timer(lapso, new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
@@ -309,7 +309,6 @@ public class VistaOrbita extends JFrame {
             }
         });
         timer.start();
-
         return;
     }
     public void actualizarLuna() {
@@ -328,6 +327,7 @@ public class VistaOrbita extends JFrame {
         double xDeltaT=xTierra-xNave;
         double yDeltaT=yTierra-yNave;
         double distanciaTierra=Math.sqrt(xDeltaT*xDeltaT+yDeltaT*yDeltaT);
+        // campoEstado.setText("dT: "+distanciaTierra);
         if (distanciaTierra<radioTierra+radioNave) {
             aparcarNave();
             return;
@@ -341,6 +341,7 @@ public class VistaOrbita extends JFrame {
         }
         nave.setVisible(xNave>xMin && xNave<xMax && yNave>yMin && yNave<yMax);
         double aceleracionTierra=gravitacionTierra/(distanciaTierra*distanciaTierra);
+        campoEstado.setText("aT: "+aceleracionTierra);
         double xAceleracionT=aceleracionTierra*xDeltaT/distanciaTierra;
         double yAceleracionT=aceleracionTierra*yDeltaT/distanciaTierra;
         double aceleracionLuna=gravitacionLuna/(distanciaLuna*distanciaLuna);
